@@ -24,11 +24,14 @@ public class ShopService {
         return listToJson;
     }
 
-    public void addGoods(ArrayList<Good> goods){
+    public void addGoods(ArrayList<Good> goods) {
         ArrayList<Good> goodsInShop = dao.getAll();
         ArrayList<String> resultOfAdding = new ArrayList<String>();
-        for (Good good : goods){
+        for (Good good : goods) {
+            Good goodInShop = dao.findByName(good.name);
+            if (goodInShop.equals(null)) {
 
+            }
         }
     }
 
