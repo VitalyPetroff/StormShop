@@ -1,9 +1,15 @@
+import java.util.List;
+
 public class ShopService {
 
-    getAll();
+    public String dataBasePath = "dataBase.json";
+    public List<Good> goods;
+    public ShopDao dao = new ShopDao(dataBasePath);
 
-    addGoods();
+//    getAll();
 
-    buyGoods();
+//    addGoods();
+
+//    buyGoods();
 
 }
