@@ -10,47 +10,57 @@ import java.util.List;
 
 public class ShopDao {
 
-    //    private static final Logger LOGGER = LoggerFactory.getLogger(Shop.class);
-    public String filePath;
+    private static final Logger LOGGER = LoggerFactory.getLogger(Good.class);
+    private String filePath;
     private ObjectMapper mapper = new ObjectMapper();
 
     ShopDao(String filePath) {
         this.filePath = filePath;
     }
 
-    public ArrayList<Good> getAll() {
+    synchronized public ArrayList<Good> getAll() {
         ArrayList<Good> listOfGoods;
         try {
-            listOfGoods = mapper.readValue(new File(filePath), new TypeReference<List<Good>>() {
-            });
+            listOfGoods = mapper.readValue(new File(filePath), new TypeReference<List<Good>>() {});
         } catch (IOException e) {
             listOfGoods = new ArrayList<Good>();
         }
         return listOfGoods;
     }
 
-    public int findByName(String name) {
+    synchronized public Good findByName(String name) {
         ArrayList<Good> listOfGoods = getAll();
-        int index = 0;
+        Good result = null;
         for (Good good : listOfGoods) {
             if (good.name.equals(name)) {
-                index = listOfGoods.indexOf(good);
+                result = good;
                 break;
             }
         }
-        return index;
+        return result;
     }
 
-    public void save(Good good) {
-        try {
-            mapper.writeValue(new File(filePath), new TypeReference<List<Good>>() {
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
+    synchronized public void save(Good good) {
+        ArrayList<Good> listOfGoods = getAll();
+        listOfGoods.add(good);
+        saveAll(listOfGoods);
+    }
+
+    synchronized public void deleteByName(String name) {
+        ArrayList<Good> listOfGoods = getAll();
+        for (Good good : listOfGoods) {
+            if (good.name.equals(name)) {
+                listOfGoods.remove(listOfGoods.indexOf(good));
+                break;
+            }
         }
     }
 
-    public void deleteByName(String name) {
-
+    synchronized private void saveAll(ArrayList<Good> goods){
+        try {
+            mapper.writeValue(new File(filePath), new TypeReference<List<Good>>(){});
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
     }
 }
