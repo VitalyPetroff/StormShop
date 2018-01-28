@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class ShopDao {
 
@@ -18,17 +17,17 @@ public class ShopDao {
         this.filePath = filePath;
     }
 
-    synchronized public ArrayList<Good> getAll() {
+    public ArrayList<Good> getAll() {
         ArrayList<Good> listOfGoods;
         try {
-            listOfGoods = mapper.readValue(new File(filePath), new TypeReference<List<Good>>() {});
+            listOfGoods = mapper.readValue(new File(filePath), new TypeReference<ArrayList<Good>>() {});
         } catch (IOException e) {
-            listOfGoods = new ArrayList<Good>();
+            listOfGoods = new ArrayList<>();
         }
         return listOfGoods;
     }
 
-    synchronized public Good findByName(String name) {
+    public Good findByName(String name) {
         ArrayList<Good> listOfGoods = getAll();
         Good result = null;
         for (Good good : listOfGoods) {
@@ -40,9 +39,20 @@ public class ShopDao {
         return result;
     }
 
-    synchronized public void save(Good good) {
+    synchronized public void saveOrUpdate(Good good) {
         ArrayList<Good> listOfGoods = getAll();
-        listOfGoods.add(good);
+        Boolean isAvailable = false;
+        for (Good goodInShop : listOfGoods) {
+            if (goodInShop.name.equals(good.name)) {
+                goodInShop.count = good.count;
+                goodInShop.price = good.price;
+                isAvailable = true;
+                break;
+            }
+        }
+        if (!isAvailable) {
+            listOfGoods.add(good);
+        }
         saveAll(listOfGoods);
     }
 
@@ -54,11 +64,12 @@ public class ShopDao {
                 break;
             }
         }
+        saveAll(listOfGoods);
     }
 
-    synchronized private void saveAll(ArrayList<Good> goods){
+    synchronized public void saveAll(ArrayList<Good> goods) {
         try {
-            mapper.writeValue(new File(filePath), new TypeReference<List<Good>>(){});
+            mapper.writeValue(new File(filePath), goods);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
