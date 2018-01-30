@@ -7,16 +7,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static spark.Spark.get;
-import static spark.Spark.post;
+import static spark.Spark.*;
 
 public class Controller {
     public static final Logger LOGGER = LoggerFactory.getLogger(Good.class);
+
     public static void main(String[] args) {
 
         ArrayList<Good> initListOfGoods = null;
         try {
-            initListOfGoods = new ObjectMapper().readValue(new File("dataInit.json"), new TypeReference<ArrayList<Good>>() {});
+            initListOfGoods = new ObjectMapper().readValue(new File("dataInit.json"), new TypeReference<ArrayList<Good>>() {
+            });
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -24,10 +25,23 @@ public class Controller {
         ShopService service = new ShopService();
         service.addGoods(initListOfGoods);
 
-        get("/get", (request, response) -> {
-            String result = service.getAll();
-            return result;
+        staticFileLocation("/");
+        options("/*", (request, response) -> {
+            String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
+
+            if (accessControlRequestHeaders != null) {
+                response.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
+            }
+            String accessControlRequestMethod = request.headers("Access-Control-Request-Method");
+
+            if (accessControlRequestMethod != null) {
+                response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
+            }
+            return "OK";
         });
+        before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
+
+        get("/getAll", (request, response) -> service.getAll());
 
         post("/add", (request, response) -> {
             String goodsToStore = request.body();
@@ -39,9 +53,16 @@ public class Controller {
 
         post("/buy", (request, response) -> {
             String goodsToBuy = request.body();
-            ArrayList<Good> listToBuy = new ObjectMapper().readValue(goodsToBuy, new TypeReference<ArrayList<Good>>(){});
-            service.buyGoods(listToBuy);
-            return "Buying is OK !";
+            ArrayList<Good> listToBuy = new ObjectMapper().readValue(goodsToBuy, new TypeReference<ArrayList<Good>>() {
+            });
+            try {
+                service.buyGoods(listToBuy);
+            } catch (IllegalArgumentException | NullPointerException er) {
+                LOGGER.info(er.getMessage(), er);
+                response.status(400);
+                return er.getMessage();
+            }
+            return "It's OK!";
         });
     }
 }

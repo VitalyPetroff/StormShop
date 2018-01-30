@@ -42,18 +42,17 @@ public class ShopService {
         dao.saveAll(goodsInShop);
     }
 
-    public void buyGoods(ArrayList<Good> goods) {
+    public void buyGoods(ArrayList<Good> goods) throws NullPointerException, IllegalArgumentException {
         for (Good good : goods) {
             Good goodInShop = dao.findByName(good.name);
-            if (!(goodInShop == null)) {
-                goodInShop.count -= good.count;
-                if (goodInShop.count < 0) {
-                    goodInShop.count = 0;
-                }
-                dao.saveOrUpdate(goodInShop);
-            } else {
-                LOGGER.info("Product is not in the store !");
+            if (goodInShop == null) {
+                throw new NullPointerException("Такого товара нет в магазине");
             }
+            if ((goodInShop.count - good.count) < 0) {
+                throw new IllegalArgumentException("Количество товаров в магазине меньше запрашиваемого!");
+            }
+            goodInShop.count -= good.count;
+            dao.saveOrUpdate(goodInShop);
         }
     }
 }
