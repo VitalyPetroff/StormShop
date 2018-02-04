@@ -25,7 +25,7 @@ public class Controller {
         ShopService service = new ShopService();
         service.addGoods(initListOfGoods);
 
-        staticFileLocation("/");
+        /*staticFileLocation("/");
         options("/*", (request, response) -> {
             String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
 
@@ -39,7 +39,7 @@ public class Controller {
             }
             return "OK";
         });
-        before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
+        before((request, response) -> response.header("Access-Control-Allow-Origin", "*")); */
 
         get("/getAll", (request, response) -> service.getAll());
 
