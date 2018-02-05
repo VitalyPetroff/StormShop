@@ -43,6 +43,7 @@ public class Main extends Application {
             LOGGER.error(e.getMessage(), e);
         }
         int countOfGoods = goodsInShop.size();
+
         gridPane.getCellBounds(5, countOfGoods + 3);
         Label totalCost = new Label();
         Label totalCount = new Label();
@@ -131,6 +132,11 @@ public class Main extends Application {
             });
         }
 
+        gridPane.add(butBuy, 3, countOfGoods + 2);
+
+        mainPane.setContent(gridPane);
+        window.setScene(new Scene(mainPane, 400, 450));
+
         ArrayList<Good> goods = goodsInShop;
         butBuy.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -155,11 +161,6 @@ public class Main extends Application {
             }
         });
 
-        gridPane.add(butBuy, 3, countOfGoods + 2);
-
-        mainPane.setContent(gridPane);
-        window.setScene(new Scene(mainPane, 400, 450));
-
         window.show();
     }
 
@@ -177,7 +178,7 @@ public class Main extends Application {
         return String.valueOf(result);
     }
 
-//    private static void viewUpdate(ArrayList<Good> goods, GridPane gridPane) {
+//    private static void viewInitialization(ArrayList<Good> goods, GridPane gridPane) {
 //
 //
 //    }
