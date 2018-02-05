@@ -16,54 +16,61 @@ public class Controller {
 
     private final String USER_AGENT = "Mozilla/5.0";
 
-    public ArrayList<Good> getAll() throws IOException {
-        String request = "http://localhost:4567/getAll";
-        URL url = new URL(request);
+    public ArrayList<Good> getAll(){
+        try {
+            String request = "http://localhost:4567/getAll";
+            URL url = new URL(request);
 
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("GET");
-        con.setRequestProperty("User-Agent", USER_AGENT);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("User-Agent", USER_AGENT);
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuffer response = new StringBuffer();
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
 
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            ArrayList<Good> goods = new ObjectMapper().readValue(response.toString(),
+                    new TypeReference<ArrayList<Good>>() {
+                    });
+            return goods;
+        } catch (IOException e) {
+            return null;
         }
-        in.close();
-
-        ArrayList<Good> goods = new ObjectMapper().readValue(response.toString(),
-                new TypeReference<ArrayList<Good>>() {
-        });
-        return goods;
     }
 
-    public void buy(ArrayList<Good> goods) throws IOException {
-        String listToJson = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(goods);
+    public void buy(ArrayList<Good> goods){
+        try {
+            String listToJson = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(goods);
 
-        String request = "http://localhost:4567/buy";
-        URL url = new URL(request);
+            String request = "http://localhost:4567/buy";
+            URL url = new URL(request);
 
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("POST");
-        con.setRequestProperty("User-Agent", USER_AGENT);
-        con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-        String urlParameters = listToJson;
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("User-Agent", USER_AGENT);
+            con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+            String urlParameters = listToJson;
 
-        con.setDoOutput(true);
-        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-        wr.writeBytes(urlParameters);
-        wr.flush();
-        wr.close();
+            con.setDoOutput(true);
+            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+            wr.writeBytes(urlParameters);
+            wr.flush();
+            wr.close();
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuffer response = new StringBuffer();
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
 
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+        } catch (IOException e) {
         }
-        in.close();
     }
 }

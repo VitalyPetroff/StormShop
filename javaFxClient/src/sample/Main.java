@@ -4,25 +4,23 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class Main extends Application {
 
-    @Override
-    public void start(Stage window) throws Exception {
+    private ArrayList<Good> goodsInShop = null;
 
-        final Logger LOGGER = LoggerFactory.getLogger(Good.class);
-        window.setX(700);
+    @Override
+    public void start(Stage window){
+        window.setX(100);
         window.setY(10);
 
         ScrollPane mainPane = new ScrollPane();
@@ -36,12 +34,7 @@ public class Main extends Application {
         gridPane.add(new Label(" Стоимость "), 5, 0);
 
         Controller service = new Controller();
-        ArrayList<Good> goodsInShop = null;
-        try {
-            goodsInShop = service.getAll();
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+        goodsInShop = service.getAll();
         int countOfGoods = goodsInShop.size();
 
         gridPane.getCellBounds(5, countOfGoods + 3);
@@ -54,7 +47,7 @@ public class Main extends Application {
         Button butBuy = new Button();
         butBuy.setText("ОПЛАТА");
         butBuy.setMinWidth(65);
-        
+
         Label[] name = new Label[countOfGoods];
         Label[] price = new Label[countOfGoods];
         Label[] countInShop = new Label[countOfGoods];
@@ -62,13 +55,12 @@ public class Main extends Application {
         Button[] butMinus = new Button[countOfGoods];
         Label[] countInCart = new Label[countOfGoods];
         Label[] cost = new Label[countOfGoods];
-        
+
         for (int i = 0; i < countOfGoods; i++) {
-            Good good = goodsInShop.get(i);
             int row = i + 1;
-            name[i] = new Label(good.name);
-            price[i] = new Label(String.valueOf(good.price));
-            countInShop[i] = new Label(String.valueOf(good.count));
+            name[i] = new Label(goodsInShop.get(i).name);
+            price[i] = new Label(String.valueOf(goodsInShop.get(i).price));
+            countInShop[i] = new Label();
             countInCart[i] = new Label();
             cost[i] = new Label();
             gridPane.add(name[i], 0, row);
@@ -89,8 +81,11 @@ public class Main extends Application {
             gridPane.add(boxButton, 3, row);
         }
 
+        goodsCounter(goodsInShop, countInShop);
+
         for (int i = 0; i < countOfGoods; i++) {
             int index = i;
+
             butPlus[i].setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent actionEvent) {
@@ -105,6 +100,8 @@ public class Main extends Application {
                         cost[index].setText(String.valueOf(numInCart * currentPrice));
                         totalCount.setText(sum(countInCart));
                         totalCost.setText(sum(cost));
+                    } else {
+                        showAlert("Количество товара в магазине меньше нуля!");
                     }
                 }
             });
@@ -127,6 +124,8 @@ public class Main extends Application {
                             countInCart[index].setText("");
                             cost[index].setText("");
                         }
+                    } else {
+                        showAlert("Данный товар в корзине отсутствует!");
                     }
                 }
             });
@@ -137,7 +136,6 @@ public class Main extends Application {
         mainPane.setContent(gridPane);
         window.setScene(new Scene(mainPane, 400, 450));
 
-        ArrayList<Good> goods = goodsInShop;
         butBuy.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -145,22 +143,19 @@ public class Main extends Application {
                 for (int index = 0; index < countOfGoods; index++) {
                     if (!countInCart[index].getText().isEmpty()) {
                         int count = Integer.parseInt(countInCart[index].getText());
-                        buyList.add(goods.get(index));
+                        buyList.add(goodsInShop.get(index));
                         buyList.get(buyList.size() - 1).count = count;
                         countInCart[index].setText("");
                         cost[index].setText("");
                     }
                 }
-                try {
-                    service.buy(buyList);
-                    service.getAll();
-                    buyList.clear();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                service.buy(buyList);
+                totalCount.setText("");
+                totalCost.setText("");
+                goodsInShop = service.getAll();
+                goodsCounter(goodsInShop, countInShop);
             }
         });
-
         window.show();
     }
 
@@ -170,16 +165,24 @@ public class Main extends Application {
 
     private static String sum(Label[] cost) {
         int result = 0;
-        for (Label iter : cost) {
-            if (!(iter.getText().isEmpty())) {
-                result += Integer.parseInt(iter.getText());
+        for (Label index : cost) {
+            if (!(index.getText().isEmpty())) {
+                result += Integer.parseInt(index.getText());
             }
         }
         return String.valueOf(result);
     }
 
-//    private static void viewInitialization(ArrayList<Good> goods, GridPane gridPane) {
-//
-//
-//    }
+    private static void goodsCounter(ArrayList<Good> goods, Label[] count) {
+        for (int i = 0; i < goods.size(); i++) {
+            count[i].setText(String.valueOf(goods.get(i).count));
+        }
+    }
+
+    private void showAlert(String information) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Attention!");
+        alert.setContentText(information);
+        alert.showAndWait();
+    }
 }
