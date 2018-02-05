@@ -19,9 +19,10 @@ public class Main extends Application {
     private ArrayList<Good> goodsInShop = null;
 
     @Override
-    public void start(Stage window){
-        window.setX(100);
-        window.setY(10);
+    public void start(Stage purchase){
+        purchase.setX(100);
+        purchase.setY(10);
+        purchase.setTitle("ПОКУПКА ТОВАРОВ В МАГАЗИНЕ");
 
         ScrollPane mainPane = new ScrollPane();
         mainPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
@@ -83,6 +84,11 @@ public class Main extends Application {
 
         goodsCounter(goodsInShop, countInShop);
 
+        gridPane.add(butBuy, 3, countOfGoods + 2);
+        mainPane.setContent(gridPane);
+        purchase.setScene(new Scene(mainPane));
+        purchase.show();
+
         for (int i = 0; i < countOfGoods; i++) {
             int index = i;
 
@@ -131,11 +137,6 @@ public class Main extends Application {
             });
         }
 
-        gridPane.add(butBuy, 3, countOfGoods + 2);
-
-        mainPane.setContent(gridPane);
-        window.setScene(new Scene(mainPane, 400, 450));
-
         butBuy.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -156,7 +157,15 @@ public class Main extends Application {
                 goodsCounter(goodsInShop, countInShop);
             }
         });
-        window.show();
+
+        Stage addingGoods = new Stage();
+
+        addingGoods.setX(500);
+        addingGoods.setY(10);
+        addingGoods.setHeight(200);
+        addingGoods.setWidth(400);
+        addingGoods.setTitle("ДОБАВЛЕНИЕ ТОВАРОВ В МАГАЗИН");
+        addingGoods.show();
     }
 
     public static void main(String[] args) {
