@@ -181,7 +181,8 @@ public class Main extends Application {
 
     private void showAlert(String information) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Attention!");
+        alert.setTitle("");
+        alert.setHeaderText("ВНИМАНИЕ!");
         alert.setContentText(information);
         alert.showAndWait();
     }
