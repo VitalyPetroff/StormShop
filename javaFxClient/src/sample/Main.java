@@ -4,10 +4,8 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -19,7 +17,7 @@ public class Main extends Application {
     private ArrayList<Good> goodsInShop = null;
 
     @Override
-    public void start(Stage purchase){
+    public void start(Stage purchase) {
         purchase.setX(100);
         purchase.setY(10);
         purchase.setTitle("ПОКУПКА ТОВАРОВ В МАГАЗИНЕ");
@@ -95,7 +93,8 @@ public class Main extends Application {
             butPlus[i].setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent actionEvent) {
-                    if (Integer.parseInt(countInShop[index].getText()) > 0) {
+//                    if ()
+                    if (Integer.parseInt(countInCart[index].getText()) < Integer.parseInt(countInShop[index].getText())) {
                         int numInCart = 0;
                         if (!countInCart[index].getText().isEmpty()) {
                             numInCart = Integer.parseInt(countInCart[index].getText());
@@ -141,13 +140,13 @@ public class Main extends Application {
             @Override
             public void handle(ActionEvent actionEvent) {
                 ArrayList<Good> buyList = new ArrayList<>();
-                for (int index = 0; index < countOfGoods; index++) {
-                    if (!countInCart[index].getText().isEmpty()) {
-                        int count = Integer.parseInt(countInCart[index].getText());
-                        buyList.add(goodsInShop.get(index));
+                for (int iD = 0; iD < countOfGoods; iD++) {
+                    if (!countInCart[iD].getText().isEmpty()) {
+                        int count = Integer.parseInt(countInCart[iD].getText());
+                        buyList.add(goodsInShop.get(iD));
                         buyList.get(buyList.size() - 1).count = count;
-                        countInCart[index].setText("");
-                        cost[index].setText("");
+                        countInCart[iD].setText("");
+                        cost[iD].setText("");
                     }
                 }
                 service.buy(buyList);
@@ -158,14 +157,43 @@ public class Main extends Application {
             }
         });
 
-        Stage addingGoods = new Stage();
+        Stage addingGoodsWindow = new Stage();
 
-        addingGoods.setX(500);
-        addingGoods.setY(10);
-        addingGoods.setHeight(200);
-        addingGoods.setWidth(400);
-        addingGoods.setTitle("ДОБАВЛЕНИЕ ТОВАРОВ В МАГАЗИН");
-        addingGoods.show();
+        addingGoodsWindow.setX(500);
+        addingGoodsWindow.setY(10);
+        addingGoodsWindow.setHeight(70);
+        addingGoodsWindow.setWidth(580);
+        addingGoodsWindow.setTitle("ДОБАВЛЕНИЕ ТОВАРОВ В МАГАЗИН");
+
+        TextField nameOfGood = new TextField();
+        TextField priceOfGood = new TextField();
+        TextField countOfGood = new TextField();
+        Button inputGood = new Button("Добавить товар");
+
+        FlowPane flowPane = new FlowPane();
+        flowPane.getChildren().addAll(nameOfGood, priceOfGood, countOfGood, inputGood);
+        Scene scene = new Scene(flowPane, 10, 10);
+
+        addingGoodsWindow.setScene(scene);
+        addingGoodsWindow.show();
+
+        inputGood.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                String name = nameOfGood.getText();
+                int price = Integer.parseInt(priceOfGood.getText());
+                int count = Integer.parseInt(countOfGood.getText());
+
+                Good newGood = new Good();
+
+                newGood.name = name;
+                newGood.price = price;
+                newGood.count = count;
+
+                String result = service.addGood(newGood);
+                showResultOfAdding(result);
+            }
+        });
     }
 
     public static void main(String[] args) {
@@ -194,5 +222,23 @@ public class Main extends Application {
         alert.setHeaderText("ВНИМАНИЕ!");
         alert.setContentText(information);
         alert.showAndWait();
+    }
+
+    private void showResultOfAdding(String information) {
+        if (information.equals("Добавление товара НЕ получилось!")) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("");
+            alert.setHeaderText("ПРОВАЛ !!!");
+            alert.setContentText(information);
+            alert.showAndWait();
+
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("");
+            alert.setHeaderText("УСПЕШНО !!!");
+            alert.setContentText(information);
+            alert.showAndWait();
+        }
+
     }
 }

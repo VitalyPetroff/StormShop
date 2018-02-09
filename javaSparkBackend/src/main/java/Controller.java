@@ -16,7 +16,8 @@ public class Controller {
 
         ArrayList<Good> initListOfGoods = null;
         try {
-            initListOfGoods = new ObjectMapper().readValue(new File("dataInit.json"), new TypeReference<ArrayList<Good>>() {
+            initListOfGoods = new ObjectMapper().readValue(new File("dataInit.json"),
+                    new TypeReference<ArrayList<Good>>() {
             });
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
@@ -25,7 +26,7 @@ public class Controller {
         ShopService service = new ShopService();
         service.addGoods(initListOfGoods);
 
-        /*staticFileLocation("/");
+        staticFileLocation("/");
         options("/*", (request, response) -> {
             String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
 
@@ -39,21 +40,23 @@ public class Controller {
             }
             return "OK";
         });
-        before((request, response) -> response.header("Access-Control-Allow-Origin", "*")); */
+        before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
 
         get("/getAll", (request, response) -> service.getAll());
 
         post("/add", (request, response) -> {
             String goodsToStore = request.body();
-            ArrayList<Good> newGoods = new ObjectMapper().readValue(goodsToStore, new TypeReference<ArrayList<Good>>() {
+            ArrayList<Good> newGoods = new ObjectMapper().readValue(goodsToStore,
+                    new TypeReference<ArrayList<Good>>() {
             });
             service.addGoods(newGoods);
-            return "Adding is OK !";
+            return "Товар добавлен успешно !";
         });
 
         post("/buy", (request, response) -> {
             String goodsToBuy = request.body();
-            ArrayList<Good> listToBuy = new ObjectMapper().readValue(goodsToBuy, new TypeReference<ArrayList<Good>>() {
+            ArrayList<Good> listToBuy = new ObjectMapper().readValue(goodsToBuy,
+                    new TypeReference<ArrayList<Good>>() {
             });
             try {
                 service.buyGoods(listToBuy);
