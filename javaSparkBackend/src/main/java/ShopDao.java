@@ -6,21 +6,24 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ShopDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Good.class);
-    private String filePath;
+    private String goodsFilePath;
+    private String accountsFilePath;
     private ObjectMapper mapper = new ObjectMapper();
 
-    ShopDao(String filePath) {
-        this.filePath = filePath;
+    ShopDao(String goodsFilePath, String accountsFilePath) {
+        this.goodsFilePath = goodsFilePath;
+        this.accountsFilePath = accountsFilePath;
     }
 
-    public ArrayList<Good> getAll() {
+    public ArrayList<Good> getAllGoods() {
         ArrayList<Good> listOfGoods;
         try {
-            listOfGoods = mapper.readValue(new File(filePath), new TypeReference<ArrayList<Good>>() {});
+            listOfGoods = mapper.readValue(new File(goodsFilePath), new TypeReference<ArrayList<Good>>() {});
         } catch (IOException e) {
             listOfGoods = new ArrayList<>();
         }
@@ -28,7 +31,7 @@ public class ShopDao {
     }
 
     public Good findByName(String name) {
-        ArrayList<Good> listOfGoods = getAll();
+        ArrayList<Good> listOfGoods = getAllGoods();
         Good result = null;
         for (Good good : listOfGoods) {
             if (good.name.equals(name)) {
@@ -40,7 +43,7 @@ public class ShopDao {
     }
 
     synchronized public void saveOrUpdate(Good good) {
-        ArrayList<Good> listOfGoods = getAll();
+        ArrayList<Good> listOfGoods = getAllGoods();
         Boolean isAvailable = false;
         for (Good goodInShop : listOfGoods) {
             if (goodInShop.name.equals(good.name)) {
@@ -57,7 +60,7 @@ public class ShopDao {
     }
 
     synchronized public void deleteByName(String name) {
-        ArrayList<Good> listOfGoods = getAll();
+        ArrayList<Good> listOfGoods = getAllGoods();
         for (Good good : listOfGoods) {
             if (good.name.equals(name)) {
                 listOfGoods.remove(listOfGoods.indexOf(good));
@@ -69,9 +72,19 @@ public class ShopDao {
 
     synchronized public void saveAll(ArrayList<Good> goods) {
         try {
-            mapper.writeValue(new File(filePath), goods);
+            mapper.writeValue(new File(goodsFilePath), goods);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
+    }
+    
+    synchronized public void getAccounts() {
+        List<Account> listOfAccounts;
+        try {
+            listOfAccounts = mapper.readValue(new File(accountsFilePath), new TypeReference<ArrayList<Account>>() {});
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+
     }
 }

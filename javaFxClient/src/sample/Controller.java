@@ -74,37 +74,42 @@ public class Controller {
     }
 
     public String addGood(Good newGood) {
-        try {
-            ArrayList<Good> goodList = new ArrayList<>();
-            goodList.add(newGood);
-            String goodToJson = new ObjectMapper().writeValueAsString(goodList);
+    }
 
-            String request = "http://localhost:4567/add";
-            URL url = new URL(request);
 
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("User-Agent", USER_AGENT);
-            con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-            String urlParameters = goodToJson;
+    public String postHandler(String requestType, String urlParametrs){
+            try {
+                ArrayList<Good> goodList = new ArrayList<>();
+                goodList.add(newGood);
+                String goodToJson = new ObjectMapper().writeValueAsString(goodList);
 
-            con.setDoOutput(true);
-            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-            wr.writeBytes(urlParameters);
-            wr.flush();
-            wr.close();
+                String request = "http://localhost:4567/" + requestType;
+                URL url = new URL(request);
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("POST");
+                con.setRequestProperty("User-Agent", USER_AGENT);
+                con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+                String urlParameters = urlParametrs;
 
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
+                con.setDoOutput(true);
+                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                wr.writeBytes(urlParameters);
+                wr.flush();
+                wr.close();
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuffer response = new StringBuffer();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+                return "Добавление товара произведено успешно!";
+            } catch (IOException e) {
             }
-            in.close();
-            return "Добавление товара произведено успешно!";
-        } catch (IOException e) {
+            return "Добавление товара НЕ получилось!";
         }
-        return "Добавление товара НЕ получилось!";
     }
 }

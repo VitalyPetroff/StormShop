@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import static spark.Spark.*;
 
 public class Controller {
-    public static final Logger LOGGER = LoggerFactory.getLogger(Good.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Good.class);
 
     public static void main(String[] args) {
 
@@ -42,7 +42,7 @@ public class Controller {
         });
         before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
 
-        get("/getAll", (request, response) -> service.getAll());
+        get("/getAllGoods", (request, response) -> service.getAllGoods());
 
         post("/add", (request, response) -> {
             String goodsToStore = request.body();

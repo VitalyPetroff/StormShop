@@ -7,13 +7,14 @@ import java.util.ArrayList;
 
 public class ShopService {
 
+    final private String goodsFilePath = "dataBase.json";
+    final private String accountsFilePath = "accounts.json";
     private static final Logger LOGGER = LoggerFactory.getLogger(Good.class);
     private ObjectMapper mapper = new ObjectMapper();
-    private String dataBasePath = "dataBase.json";
-    private ShopDao dao = new ShopDao(dataBasePath);
+    private ShopDao dao = new ShopDao(goodsFilePath, accountsFilePath);
 
-    public String getAll() {
-        ArrayList<Good> goods = dao.getAll();
+    public String getAllGoods() {
+        ArrayList<Good> goods = dao.getAllGoods();
         String listToJson = null;
         try {
             listToJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(goods);
@@ -24,7 +25,7 @@ public class ShopService {
     }
 
     public void addGoods(ArrayList<Good> newGoods) {
-        ArrayList<Good> goodsInShop = dao.getAll();
+        ArrayList<Good> goodsInShop = dao.getAllGoods();
         for (Good newGood : newGoods) {
             boolean isAvailable = false;
             for (Good goodInShop : goodsInShop) {

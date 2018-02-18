@@ -11,10 +11,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Main extends Application {
 
-    private ArrayList<Good> goodsInShop = null;
+    private List<Good> goodsInShop = new ArrayList<>();
 
     @Override
     public void start(Stage purchase) {
@@ -93,7 +94,6 @@ public class Main extends Application {
             butPlus[i].setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent actionEvent) {
-//                    if ()
                     if (Integer.parseInt(countInCart[index].getText()) < Integer.parseInt(countInShop[index].getText())) {
                         int numInCart = 0;
                         if (!countInCart[index].getText().isEmpty()) {
@@ -210,7 +210,7 @@ public class Main extends Application {
         return String.valueOf(result);
     }
 
-    private static void goodsCounter(ArrayList<Good> goods, Label[] count) {
+    private static void goodsCounter(List<Good> goods, Label[] count) {
         for (int i = 0; i < goods.size(); i++) {
             count[i].setText(String.valueOf(goods.get(i).count));
         }
@@ -239,6 +239,5 @@ public class Main extends Application {
             alert.setContentText(information);
             alert.showAndWait();
         }
-
     }
 }
