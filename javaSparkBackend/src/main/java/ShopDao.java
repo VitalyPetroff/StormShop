@@ -6,18 +6,15 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class ShopDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Good.class);
     private String goodsFilePath;
-    private String accountsFilePath;
     private ObjectMapper mapper = new ObjectMapper();
 
-    ShopDao(String goodsFilePath, String accountsFilePath) {
+    ShopDao(String goodsFilePath) {
         this.goodsFilePath = goodsFilePath;
-        this.accountsFilePath = accountsFilePath;
     }
 
     public ArrayList<Good> getAllGoods() {
@@ -76,15 +73,5 @@ public class ShopDao {
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
-    }
-    
-    synchronized public void getAccounts() {
-        List<Account> listOfAccounts;
-        try {
-            listOfAccounts = mapper.readValue(new File(accountsFilePath), new TypeReference<ArrayList<Account>>() {});
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-
     }
 }

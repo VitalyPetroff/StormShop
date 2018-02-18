@@ -1,10 +1,13 @@
 public class Account {
 
-    public String name;
-    public String hashPassword;
+    public String login;
+    public String password;
 
-    public Account(String name, String hashPassword) {
-        this.name = name;
-        this.hashPassword = hashPassword;
+    public Account() {
+    }
+
+    public Account(String login, String password) {
+        this.login = login;
+        this.password = password;
     }
 }

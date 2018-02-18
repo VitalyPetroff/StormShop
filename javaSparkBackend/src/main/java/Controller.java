@@ -23,8 +23,8 @@ public class Controller {
             LOGGER.error(e.getMessage(), e);
         }
 
-        ShopService service = new ShopService();
-        service.addGoods(initListOfGoods);
+        ShopService shopService = new ShopService();
+        shopService.addGoods(initListOfGoods);
 
         staticFileLocation("/");
         options("/*", (request, response) -> {
@@ -42,30 +42,41 @@ public class Controller {
         });
         before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
 
-        get("/getAllGoods", (request, response) -> service.getAllGoods());
-
-        post("/add", (request, response) -> {
-            String goodsToStore = request.body();
-            ArrayList<Good> newGoods = new ObjectMapper().readValue(goodsToStore,
-                    new TypeReference<ArrayList<Good>>() {
-            });
-            service.addGoods(newGoods);
-            return "Товар добавлен успешно !";
-        });
+        get("/getAllGoods", (request, response) -> shopService.getAllGoods());
 
         post("/buy", (request, response) -> {
             String goodsToBuy = request.body();
             ArrayList<Good> listToBuy = new ObjectMapper().readValue(goodsToBuy,
-                    new TypeReference<ArrayList<Good>>() {
-            });
+                    new TypeReference<ArrayList<Good>>() {});
             try {
-                service.buyGoods(listToBuy);
+                shopService.buyGoods(listToBuy);
             } catch (IllegalArgumentException | NullPointerException er) {
                 LOGGER.info(er.getMessage(), er);
                 response.status(400);
                 return er.getMessage();
             }
             return "It's OK!";
+        });
+
+        AccountService accountService = new AccountService();
+        post("/authorization", (request, response) -> {
+            String strClient = request.body();
+            Account client = new ObjectMapper().readValue(strClient, Account.class);
+            return accountService.authorization(client);
+        });
+
+        post("/add", (request, response) -> {
+            String accessToken = request.headers("Authorization");
+            if (accountService.verification(accessToken)) {
+                String goodsToStore = request.body();
+                ArrayList<Good> newGoods = new ObjectMapper().readValue(goodsToStore,
+                        new TypeReference<ArrayList<Good>>() {
+                        });
+                shopService.addGoods(newGoods);
+                return "Adding successfully!";
+            } else {
+                return "Verification is failed!";
+            }
         });
     }
 }

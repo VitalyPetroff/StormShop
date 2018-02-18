@@ -8,10 +8,9 @@ import java.util.ArrayList;
 public class ShopService {
 
     final private String goodsFilePath = "dataBase.json";
-    final private String accountsFilePath = "accounts.json";
     private static final Logger LOGGER = LoggerFactory.getLogger(Good.class);
     private ObjectMapper mapper = new ObjectMapper();
-    private ShopDao dao = new ShopDao(goodsFilePath, accountsFilePath);
+    private ShopDao dao = new ShopDao(goodsFilePath);
 
     public String getAllGoods() {
         ArrayList<Good> goods = dao.getAllGoods();
