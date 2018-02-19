@@ -231,7 +231,6 @@ public class Main extends Application {
             alert.setHeaderText("ПРОВАЛ !!!");
             alert.setContentText(information);
             alert.showAndWait();
-
         } else {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("");

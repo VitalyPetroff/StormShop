@@ -66,7 +66,7 @@ public class Controller {
         });
 
         post("/add", (request, response) -> {
-            String accessToken = request.headers("Authorization");
+            String accessToken = request.headers("Verification");
             if (accountService.verification(accessToken)) {
                 String goodsToStore = request.body();
                 ArrayList<Good> newGoods = new ObjectMapper().readValue(goodsToStore,
