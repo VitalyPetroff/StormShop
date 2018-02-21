@@ -14,4 +14,16 @@ public class Good {
         this.count = count;
         this.price = price;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public int getPrice() {
+        return price;
+    }
 }

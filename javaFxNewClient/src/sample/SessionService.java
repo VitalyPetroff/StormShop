@@ -15,7 +15,7 @@ public class SessionService {
     private final String USER_AGENT = "Mozilla/5.0";
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionService.class);
 
-    public StringBuffer sendRequest(String ... args) {
+    public StringBuffer sendPostRequest(String... args) {
         try {
             String request = args[0];
             String bodyRequest = args[1];
@@ -26,7 +26,7 @@ public class SessionService {
             con.setRequestProperty("User-Agent", USER_AGENT);
             con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
             if (args.length > 2) {
-                con.setRequestProperty("Verification" , args[2]);
+                con.setRequestProperty("Verification", args[2]);
             }
 
             con.setDoOutput(true);
@@ -49,5 +49,29 @@ public class SessionService {
             LOGGER.error(e.getMessage(), e);
         }
         return null;
+    }
+
+    public StringBuffer sendGetRequest(String server, String type) {
+        try {
+            String request = server.concat(type);
+            URL url = new URL(request);
+
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("User-Agent", USER_AGENT);
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            return response;
+        } catch (IOException e) {
+            return null;
+        }
     }
 }

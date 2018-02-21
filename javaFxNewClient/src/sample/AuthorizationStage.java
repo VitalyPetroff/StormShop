@@ -11,14 +11,14 @@ import javafx.stage.Stage;
 
 public class AuthorizationStage {
 
-    public void initialization() {
-        int coordX = 700;
+    public void createStage(String server) {
+        int coordX = 750;
         int coordY = 10;
         int gap = 20;
         int inset = 10;
 
         Stage authorization = new Stage();
-        Controller controller = new Controller();
+        Controller controller = new Controller(server);
 
         authorization.setX(coordX);
         authorization.setY(coordY);
