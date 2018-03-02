@@ -11,14 +11,14 @@ import javafx.stage.Stage;
 
 public class AuthorizationStage {
 
-    public void createStage(String server) {
-        int coordX = 750;
+
+    public void createStage(String server, Controller controller) {
+        int coordX = 700;
         int coordY = 10;
         int gap = 20;
         int inset = 10;
 
         Stage authorization = new Stage();
-        Controller controller = new Controller(server);
 
         authorization.setX(coordX);
         authorization.setY(coordY);
@@ -32,7 +32,7 @@ public class AuthorizationStage {
         pane.add(new Label("Input Admin Name & Password"), 0, 0, 2, 1);
 
         pane.add(new Label("Admin Name"), 0, 1);
-        TextField textLogin = new TextField();
+        TextField textLogin = new TextField("login3");
         pane.add(textLogin, 1, 1);
 
         pane.add(new Label("Password"), 0, 2);
@@ -49,15 +49,12 @@ public class AuthorizationStage {
         buttonLogin.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                String result = controller.authorization(textLogin.getText(), textPassword.getText());
-                if (!result.equals("Authorization is failed!")) {
+                String result = controller.authorization(server, textLogin.getText(), textPassword.getText());
+                if (!result.equals("FAILED")) {
                     authorization.close();
-                    new AdminStage().initialization();
+                    new AdminStage().adminForm(server, controller);
                 } else {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle(result);
-                    alert.setHeaderText(result);
-                    alert.showAndWait();
+                    new Alert(Alert.AlertType.ERROR, result).show();
                 }
             }
         });

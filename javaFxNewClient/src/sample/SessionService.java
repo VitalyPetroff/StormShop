@@ -17,16 +17,16 @@ public class SessionService {
 
     public StringBuffer sendPostRequest(String... args) {
         try {
-            String request = args[0];
-            String bodyRequest = args[1];
+            String request = args[0].concat(args[1]);
+            String bodyRequest = args[2];
 
             URL url = new URL(request);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("User-Agent", USER_AGENT);
             con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-            if (args.length > 2) {
-                con.setRequestProperty("Verification", args[2]);
+            if (args.length > 3) {
+                con.setRequestProperty("Verification", args[3]);
             }
 
             con.setDoOutput(true);
@@ -71,7 +71,7 @@ public class SessionService {
 
             return response;
         } catch (IOException e) {
-            return null;
+            return new StringBuffer("Error");
         }
     }
 }

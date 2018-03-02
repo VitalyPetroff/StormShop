@@ -8,32 +8,42 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Controller {
-    public String server;
-    private SessionService service = new SessionService();
+    private SessionService sessionService = new SessionService();
     private ObjectMapper mapper = new ObjectMapper();
     private Logger LOGGER = LoggerFactory.getLogger(Controller.class);
     private String token;
 
-    public Controller(String server) {
-        this.server = server;
+    public ArrayList<Good> getAll(String server) throws IOException {
+        StringBuffer request = sessionService.sendGetRequest(server, "getAllGoods");
+        if (!request.toString().equals("Error")) {
+            ArrayList<Good> goodsInShop = new ArrayList<>();
+            try {
+                goodsInShop = new ObjectMapper().readValue(request.toString(),
+                        new TypeReference<ArrayList<Good>>() {
+                        });
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
+            return goodsInShop;
+        } else {
+            throw new IOException("The address is invalid or the connection is missing!");
+        }
     }
 
-    public ArrayList<Good> getAll(){
-        StringBuffer goods = service.sendGetRequest(server, "getAllGoods");
-        ArrayList<Good> goodsInShop = new ArrayList<>();
+    public String buy(String server, ArrayList<Good> goods) {
+        String goodsToJson = "";
         try {
-            goodsInShop = new ObjectMapper().readValue(goods.toString(),
-                    new TypeReference<ArrayList<Good>>() {});
+            goodsToJson = mapper.writeValueAsString(goods);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
-        return goodsInShop;
+        String result = sessionService.sendPostRequest(server, "buy", goodsToJson).toString();
+        return result;
     }
 
-    public String authorization(String login, String password) {
+    public String authorization(String server, String login, String password) {
         Account account = new Account(login, password);
         String strAccount = "";
         try {
@@ -41,17 +51,18 @@ public class Controller {
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
         }
-
-        String request = server.concat("/authorization");
-        token = (service.sendPostRequest(request, strAccount)).toString();
-        System.out.println(token);  // удалить строку
+        token = (sessionService.sendPostRequest(server, "authorization", strAccount)).toString();
         return token;
     }
 
-    public String add() {
-        String request = server.concat("/add");
-        StringBuffer result = service.sendPostRequest(request, "Hello World!", token);
-        System.out.println(result.toString()); // удалить строку
-        return token;
+    public String add(String server, Good good) {
+        String goodToJson = "";
+        try {
+            goodToJson = mapper.writeValueAsString(good);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        String result = sessionService.sendPostRequest(server, "add", goodToJson, token).toString();
+        return result;
     }
 }

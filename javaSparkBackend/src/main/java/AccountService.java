@@ -29,7 +29,7 @@ public class AccountService {
                 }
             }
         }
-        return "Authorization is failed!";
+        return "FAILED";
     }
 
     public boolean verification(String clientToken) {

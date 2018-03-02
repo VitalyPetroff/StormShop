@@ -24,7 +24,6 @@ public class Controller {
         }
 
         ShopService shopService = new ShopService();
-        shopService.addGoods(initListOfGoods);
 
         staticFileLocation("/");
         options("/*", (request, response) -> {
@@ -48,14 +47,7 @@ public class Controller {
             String goodsToBuy = request.body();
             ArrayList<Good> listToBuy = new ObjectMapper().readValue(goodsToBuy,
                     new TypeReference<ArrayList<Good>>() {});
-            try {
-                shopService.buyGoods(listToBuy);
-            } catch (IllegalArgumentException | NullPointerException er) {
-                LOGGER.info(er.getMessage(), er);
-                response.status(400);
-                return er.getMessage();
-            }
-            return "It's OK!";
+            return shopService.buyGoods(listToBuy);
         });
 
         AccountService accountService = new AccountService();
@@ -68,14 +60,12 @@ public class Controller {
         post("/add", (request, response) -> {
             String accessToken = request.headers("Verification");
             if (accountService.verification(accessToken)) {
-                String goodsToStore = request.body();
-                ArrayList<Good> newGoods = new ObjectMapper().readValue(goodsToStore,
-                        new TypeReference<ArrayList<Good>>() {
-                        });
-                shopService.addGoods(newGoods);
-                return "Adding successfully!";
+                String good = request.body();
+                Good newGood = new ObjectMapper().readValue(good, Good.class);
+                String result = shopService.addGood(newGood);
+                return result;
             } else {
-                return "Verification is failed!";
+                return "FAILED";
             }
         });
     }

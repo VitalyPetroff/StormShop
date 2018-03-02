@@ -16,43 +16,56 @@ public class ShopService {
         ArrayList<Good> goods = dao.getAllGoods();
         String listToJson = null;
         try {
-            listToJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(goods);
+            listToJson = mapper.writeValueAsString(goods);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
         return listToJson;
     }
 
-    public void addGoods(ArrayList<Good> newGoods) {
+    public String addGood(Good good) {
+        String result = "FAILED";
         ArrayList<Good> goodsInShop = dao.getAllGoods();
-        for (Good newGood : newGoods) {
-            boolean isAvailable = false;
-            for (Good goodInShop : goodsInShop) {
-                if (newGood.name.equals(goodInShop.name)) {
-                    goodInShop.count += newGood.count;
-                    goodInShop.price = newGood.price;
-                    isAvailable = true;
-                    break;
-                }
-            }
-            if (!isAvailable) {
-                goodsInShop.add(newGood);
+        boolean isAvailable = false;
+        for (Good goodInShop : goodsInShop) {
+            if (good.name.equals(goodInShop.name)) {
+                goodInShop.count += good.count;
+                goodInShop.price = good.price;
+                isAvailable = true;
+                result = "The goods in the store have been updated.";
+                break;
             }
         }
+        if (!isAvailable) {
+            goodsInShop.add(good);
+            result = "The product was added to the store.";
+        }
         dao.saveAll(goodsInShop);
+        return result;
     }
 
-    public void buyGoods(ArrayList<Good> goods) throws NullPointerException, IllegalArgumentException {
+    public String buyGoods(ArrayList<Good> goods) {
+        String result = "OK";
+        boolean testGoods = true;
         for (Good good : goods) {
             Good goodInShop = dao.findByName(good.name);
             if (goodInShop == null) {
-                throw new NullPointerException("Такого товара нет в магазине");
+                result = good.name.concat(" is end in shop");
+                testGoods = false;
+                break;
+            } else if (goodInShop.count < good.count) {
+                result = "Quantity of ".concat(good.name).concat(" is less than requested");
+                testGoods = false;
+                break;
             }
-            if ((goodInShop.count - good.count) < 0) {
-                throw new IllegalArgumentException("Количество товаров в магазине меньше запрашиваемого!");
-            }
-            goodInShop.count -= good.count;
-            dao.saveOrUpdate(goodInShop);
         }
+        if (testGoods) {
+            for (Good good : goods) {
+                Good goodInShop = dao.findByName(good.name);
+                goodInShop.count -= good.count;
+                dao.saveOrUpdate(goodInShop);
+            }
+        }
+        return result;
     }
 }
