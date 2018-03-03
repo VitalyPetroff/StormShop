@@ -86,7 +86,7 @@ public class AdminStage {
                     newGood.price = priceOfGood;
                     newGood.count = countOfGood;
 
-                    String result = controller.add(server, newGood);
+                    String result = controller.addNewGood(server, newGood);
                     if (result.equals("FAILED")) {
                         new Alert(Alert.AlertType.ERROR, "Failed!").show();
                     } else {

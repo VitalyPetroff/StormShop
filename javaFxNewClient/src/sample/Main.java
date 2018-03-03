@@ -32,12 +32,10 @@ public class Main extends Application {
     private Button refreshButton;
 
     private TableView<Good> shopTable;
-    private ArrayList<Good> goodsInShop;
     private ObservableList<Good> observableGoodsInShop;
     private Button addToShopButton;
 
     private TableView<Good> cartTable;
-    private ArrayList<Good> goodsInCart = new ArrayList<>();
     private ObservableList<Good> observableGoodsInCart;
     private Button addToCartButton;
     private Button buttonRemoveFromCart;
@@ -112,13 +110,8 @@ public class Main extends Application {
         refreshButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                try {
-                    goodsInShop = new ArrayList<>();
-                    goodsInShop = controller.getAll(server.getText());
-                } catch (IOException e) {
-                    new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
-                }
                 updateShopInfo();
+                updateCartInfo();
             }
         });
     }
@@ -138,7 +131,6 @@ public class Main extends Application {
     private void createCartView() {
         observableGoodsInCart = FXCollections.observableArrayList();
         cartTable = new TableView<>(observableGoodsInCart);
-
         pane.add(new Label("Goods in Cart"), 4, 1);
         cartTable = new TableView<>();
         TableColumn<Good, String> nameColumn = new TableColumn<>("Name");
@@ -160,18 +152,7 @@ public class Main extends Application {
             public void handle(ActionEvent actionEvent) {
                 try {
                     Good selectedGood = shopTable.getSelectionModel().getSelectedItem();
-                    boolean isInCart = false;
-                    for (Good iter : goodsInCart) {
-                        if (iter.name.equals(selectedGood.name)) {
-                            iter.count++;
-                            isInCart = true;
-                            break;
-                        }
-                    }
-                    if (!isInCart) {
-                        selectedGood.count = 1;
-                        goodsInCart.add(selectedGood);
-                    }
+                    controller.addGoodToCart(selectedGood);
                     updateCartInfo();
                 } catch (NullPointerException e) {
                     LOGGER.error(e.getMessage(), e);
@@ -189,7 +170,7 @@ public class Main extends Application {
             @Override
             public void handle(ActionEvent actionEvent) {
                 Good selectedGood = cartTable.getSelectionModel().getSelectedItem();
-                goodsInCart.remove(selectedGood);
+                controller.removeGoodFromCart(selectedGood);
                 updateCartInfo();
             }
         });
@@ -205,8 +186,7 @@ public class Main extends Application {
             public void handle(ActionEvent actionEvent) {
                 try {
                     Good selectedGood = cartTable.getSelectionModel().getSelectedItem();
-                    int index = goodsInCart.indexOf(selectedGood);
-                    goodsInCart.get(index).count++;
+                    controller.increaseCount(selectedGood);
                     updateCartInfo();
                     cartTable.getSelectionModel().select(selectedGood);
                 } catch (NullPointerException e) {
@@ -226,11 +206,7 @@ public class Main extends Application {
             public void handle(ActionEvent actionEvent) {
                 try {
                     Good selectedGood = cartTable.getSelectionModel().getSelectedItem();
-                    int index = goodsInCart.indexOf(selectedGood);
-                    goodsInCart.get(index).count--;
-                    if (goodsInCart.get(index).count <= 0) {
-                        goodsInCart.get(index).count = 0;
-                    }
+                    controller.decreaseCount(selectedGood);
                     updateCartInfo();
                     cartTable.getSelectionModel().select(selectedGood);
                 } catch (NullPointerException e) {
@@ -254,18 +230,16 @@ public class Main extends Application {
     private void createBuyButton() {
         addToCartButton = new Button("Buy all goods");
         pane.add(addToCartButton, 4, 6);
-
         addToCartButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                String result = controller.buy(server.getText(), goodsInCart);
-                if (result.equals("OK")) {
+                try {
+                    controller.buy(server.getText());
                     new Alert(Alert.AlertType.INFORMATION, "Buying is OK!").show();
-                    goodsInCart.clear();
                     updateCartInfo();
                     updateShopInfo();
-                } else {
-                    new Alert(Alert.AlertType.ERROR, result).show();
+                } catch (IOException e) {
+                    new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
                 }
             }
         });
@@ -279,22 +253,21 @@ public class Main extends Application {
     }
 
     private void updateShopInfo() {
-        observableGoodsInShop.clear();
-        observableGoodsInShop.addAll(goodsInShop);
-        shopTable.setItems(observableGoodsInShop);
+        try {
+            observableGoodsInShop.clear();
+            observableGoodsInShop.addAll(controller.getGoodsInShop(server.getText()));
+            shopTable.setItems(observableGoodsInShop);
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
+        }
     }
 
     private void updateCartInfo() {
         observableGoodsInCart.clear();
-        observableGoodsInCart.addAll(goodsInCart);
+        observableGoodsInCart.addAll(controller.getGoodsInCart());
         cartTable.setItems(observableGoodsInCart);
-        int price = 0;
-        int count = 0;
-        for (Good good : goodsInCart) {
-            count += good.count;
-            price += good.count * good.price;
-        }
-        totalCount.setText(Integer.toString(count));
-        totalPrice.setText(Integer.toString(price));
+
+        totalCount.setText(Integer.toString(controller.getTotalCount()));
+        totalPrice.setText(Integer.toString(controller.getTotalPrice()));
     }
 }

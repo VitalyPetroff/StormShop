@@ -15,10 +15,14 @@ public class Controller {
     private Logger LOGGER = LoggerFactory.getLogger(Controller.class);
     private String token;
 
-    public ArrayList<Good> getAll(String server) throws IOException {
+    private ArrayList<Good> goodsInShop = new ArrayList<>();
+    private ArrayList<Good> goodsInCart = new ArrayList<>();
+    private int totalCount;
+    private int totalPrice;
+
+    public ArrayList<Good> getGoodsInShop(String server) throws IOException {
         StringBuffer request = sessionService.sendGetRequest(server, "getAllGoods");
         if (!request.toString().equals("Error")) {
-            ArrayList<Good> goodsInShop = new ArrayList<>();
             try {
                 goodsInShop = new ObjectMapper().readValue(request.toString(),
                         new TypeReference<ArrayList<Good>>() {
@@ -32,14 +36,65 @@ public class Controller {
         }
     }
 
-    public String buy(String server, ArrayList<Good> goods) {
+    public ArrayList<Good> getGoodsInCart() {
+        return goodsInCart;
+    }
+
+    public void addGoodToCart(Good newGood) {
+        boolean isInCart = false;
+        for (Good good : goodsInCart) {
+            if (good.name.equals(newGood.name)) {
+                good.count++;
+                isInCart = true;
+                break;
+            }
+        }
+        if (!isInCart) {
+            newGood.count = 1;
+            goodsInCart.add(newGood);
+        }
+        updateTotalInfo();
+    }
+
+    public void removeGoodFromCart(Good good) {
+        goodsInCart.remove(good);
+    }
+
+    public void increaseCount(Good good) {
+        int index = goodsInCart.indexOf(good);
+        goodsInCart.get(index).count++;
+    }
+
+    public void decreaseCount(Good good) {
+        int index = goodsInCart.indexOf(good);
+        goodsInCart.get(index).count--;
+        if (goodsInCart.get(index).count <= 0) {
+            goodsInCart.get(index).count = 0;
+        }
+    }
+
+    private void updateTotalInfo() {
+        totalCount = 0;
+        totalPrice = 0;
+        for (Good good : goodsInCart) {
+            totalCount += good.count;
+            totalPrice += good.count * good.price;
+        }
+    }
+
+    public String buy(String server) throws IOException {
         String goodsToJson = "";
         try {
-            goodsToJson = mapper.writeValueAsString(goods);
+            goodsToJson = mapper.writeValueAsString(goodsInCart);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
         String result = sessionService.sendPostRequest(server, "buy", goodsToJson).toString();
+        if (result.equals("OK")) {
+            goodsInCart.clear();
+        } else {
+            throw new IOException(result);
+        }
         return result;
     }
 
@@ -55,7 +110,7 @@ public class Controller {
         return token;
     }
 
-    public String add(String server, Good good) {
+    public String addNewGood(String server, Good good) {
         String goodToJson = "";
         try {
             goodToJson = mapper.writeValueAsString(good);
@@ -64,5 +119,14 @@ public class Controller {
         }
         String result = sessionService.sendPostRequest(server, "add", goodToJson, token).toString();
         return result;
+    }
+
+
+    public int getTotalCount() {
+        return totalCount;
+    }
+
+    public int getTotalPrice() {
+        return totalPrice;
     }
 }
