@@ -12,6 +12,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
@@ -20,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 public class Main extends Application {
 
@@ -56,6 +59,7 @@ public class Main extends Application {
         createRemoveFromCartButton();
         createAddToShopButton();
         createBuyButton();
+        createImage();
 
         shopWindow.setScene(new Scene(pane));
         shopWindow.show();
@@ -91,7 +95,7 @@ public class Main extends Application {
         pane.getColumnConstraints().add(new ColumnConstraints(140));
         pane.getColumnConstraints().add(new ColumnConstraints(115));
         pane.getColumnConstraints().add(new ColumnConstraints(70));
-        pane.getColumnConstraints().add(new ColumnConstraints(90));
+        pane.getColumnConstraints().add(new ColumnConstraints(100));
         pane.getColumnConstraints().add(new ColumnConstraints(70));
 
         int rowHeight = 25;
@@ -105,6 +109,18 @@ public class Main extends Application {
         pane.getRowConstraints().add(new RowConstraints(rowHeight));
         pane.getRowConstraints().add(new RowConstraints(rowHeight));
         pane.getRowConstraints().add(new RowConstraints(rowHeight));
+    }
+
+    private void createImage() {
+        Class<?> clazz = this.getClass();
+        InputStream input = clazz.getResourceAsStream("/icon/stormnetLogo.JPG");
+        Image image = new Image(input);
+        pane.add(new ImageView(image), 2, 2);
+
+        input = clazz.getResourceAsStream("/icon/stormnetTitle.JPG");
+        image = new Image(input, 250, 25, false, true);
+        pane.add(new ImageView(image), 3, 0, 3, 1);
+
     }
 
     private void createServerInfo() {
@@ -121,8 +137,8 @@ public class Main extends Application {
         refreshButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                updateShopInfo();
-                updateCartInfo();
+                updateShopTable();
+                updateCartTable();
             }
         });
     }
@@ -134,6 +150,7 @@ public class Main extends Application {
         TableColumn<Good, String> nameColumn = new TableColumn<>("Name");
         TableColumn<Good, Integer> priceColumn = new TableColumn<>("Price");
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        nameColumn.setSortType(TableColumn.SortType.ASCENDING);
         priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
         shopTable.getColumns().addAll(nameColumn, priceColumn);
         pane.add(shopTable, 0, 2, 2, 5);
@@ -164,7 +181,7 @@ public class Main extends Application {
                 try {
                     Good selectedGood = shopTable.getSelectionModel().getSelectedItem();
                     controller.addGoodToCart(selectedGood);
-                    updateCartInfo();
+                    updateCartTable();
                 } catch (NullPointerException e) {
                     LOGGER.error(e.getMessage(), e);
                 }
@@ -181,8 +198,10 @@ public class Main extends Application {
             @Override
             public void handle(ActionEvent actionEvent) {
                 Good selectedGood = cartTable.getSelectionModel().getSelectedItem();
-                controller.removeGoodFromCart(selectedGood);
-                updateCartInfo();
+                if (selectedGood != null) {
+                    controller.removeGoodFromCart(selectedGood);
+                    updateCartTable();
+                }
             }
         });
     }
@@ -197,7 +216,7 @@ public class Main extends Application {
                 try {
                     Good selectedGood = cartTable.getSelectionModel().getSelectedItem();
                     controller.increaseCount(selectedGood);
-                    updateCartInfo();
+                    updateCartTable();
                     cartTable.getSelectionModel().select(selectedGood);
                 } catch (NullPointerException e) {
                     LOGGER.error(e.getMessage(), e);
@@ -216,7 +235,7 @@ public class Main extends Application {
                 try {
                     Good selectedGood = cartTable.getSelectionModel().getSelectedItem();
                     controller.decreaseCount(selectedGood);
-                    updateCartInfo();
+                    updateCartTable();
                     cartTable.getSelectionModel().select(selectedGood);
                 } catch (NullPointerException e) {
                     LOGGER.error(e.getMessage(), e);
@@ -245,8 +264,8 @@ public class Main extends Application {
                 try {
                     controller.buy(server.getText());
                     new Alert(Alert.AlertType.INFORMATION, "Buying is OK!").show();
-                    updateCartInfo();
-                    updateShopInfo();
+                    updateCartTable();
+                    updateShopTable();
                 } catch (IOException e) {
                     new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
                 }
@@ -261,22 +280,49 @@ public class Main extends Application {
         pane.add(totalPrice, 4, 9);
     }
 
-    private void updateShopInfo() {
-        try {
-            observableGoodsInShop.clear();
-            observableGoodsInShop.addAll(controller.getGoodsInShop(server.getText()));
-            shopTable.setItems(observableGoodsInShop);
-        } catch (IOException e) {
-            new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
+    private void updateShopTable() {
+        ObservableList<TableColumn<Good, ?>> listSort = shopTable.getSortOrder();
+        if (listSort.size() > 0) {
+            TableColumn<Good, ?> sortOrder = shopTable.getSortOrder().get(0);
+            shopTable.getSortOrder().clear();
+
+            updateShopList();
+
+            shopTable.getSortOrder().add(sortOrder);
+        } else {
+            updateShopList();
         }
     }
 
-    private void updateCartInfo() {
+    private void updateCartTable() {
+        ObservableList<TableColumn<Good, ?>> listSort = cartTable.getSortOrder();
+        if (listSort.size() > 0) {
+            TableColumn<Good, ?> sortOrder = cartTable.getSortOrder().get(0);
+            cartTable.getSortOrder().clear();
+
+            updateCartList();
+
+            cartTable.getSortOrder().add(sortOrder);
+        } else {
+            updateCartList();
+        }
+        totalCount.setText(Integer.toString(controller.getTotalCount()));
+        totalPrice.setText(Integer.toString(controller.getTotalPrice()));
+    }
+
+    private void updateShopList() {
+        observableGoodsInShop.clear();
+        try {
+            observableGoodsInShop.addAll(controller.getGoodsInShop(server.getText()));
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
+        }
+        shopTable.setItems(observableGoodsInShop);
+    }
+
+    private void updateCartList() {
         observableGoodsInCart.clear();
         observableGoodsInCart.addAll(controller.getGoodsInCart());
         cartTable.setItems(observableGoodsInCart);
-
-        totalCount.setText(Integer.toString(controller.getTotalCount()));
-        totalPrice.setText(Integer.toString(controller.getTotalPrice()));
     }
 }

@@ -58,6 +58,7 @@ public class Controller {
 
     public void removeGoodFromCart(Good good) {
         goodsInCart.remove(good);
+        updateTotalInfo();
     }
 
     public void increaseCount(Good good) {
