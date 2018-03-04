@@ -12,40 +12,32 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.RowConstraints;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class Main extends Application {
 
     private Logger LOGGER = LoggerFactory.getLogger(Controller.class);
     private final String serverName = "http://localhost:4567/";
     private Controller controller;
-    private double buttonWidth = 55;
     private GridPane pane;
 
     private TextField server;
-    private Button refreshButton;
 
     private TableView<Good> shopTable;
     private ObservableList<Good> observableGoodsInShop;
-    private Button addToShopButton;
 
     private TableView<Good> cartTable;
     private ObservableList<Good> observableGoodsInCart;
-    private Button addToCartButton;
-    private Button buttonRemoveFromCart;
 
     private Label totalCount;
     private Label totalPrice;
-    private Button buyButton;
-    private Button buttonIncrement;
-    private Button buttonDecrement;
-    private Button buttonAddToShop;
 
     public Main() {
     }
@@ -78,23 +70,41 @@ public class Main extends Application {
     private void stageInitialization(Stage shopWindow) {
         int coordX = 100;
         int coordY = 10;
-        int height = 600;
-        int width = 600;
 
         shopWindow.setX(coordX);
         shopWindow.setY(coordY);
-        shopWindow.setHeight(height);
-        shopWindow.setWidth(width);
         shopWindow.setTitle("Shopping");
     }
 
     private void createPane() {
-        int gap = 10;
-        int inset = 10;
         pane = new GridPane();
+//        pane.setGridLinesVisible(true);
+
+        int gap = 5;
         pane.setHgap(gap);
         pane.setVgap(gap);
+
+        int inset = 10;
         pane.setPadding(new Insets(inset, inset, inset, inset));
+
+        pane.getColumnConstraints().add(new ColumnConstraints(35));
+        pane.getColumnConstraints().add(new ColumnConstraints(140));
+        pane.getColumnConstraints().add(new ColumnConstraints(115));
+        pane.getColumnConstraints().add(new ColumnConstraints(70));
+        pane.getColumnConstraints().add(new ColumnConstraints(90));
+        pane.getColumnConstraints().add(new ColumnConstraints(70));
+
+        int rowHeight = 25;
+        pane.getRowConstraints().add(new RowConstraints(rowHeight));
+        pane.getRowConstraints().add(new RowConstraints(rowHeight));
+        pane.getRowConstraints().add(new RowConstraints(100));
+        pane.getRowConstraints().add(new RowConstraints(rowHeight));
+        pane.getRowConstraints().add(new RowConstraints(rowHeight));
+        pane.getRowConstraints().add(new RowConstraints(100));
+        pane.getRowConstraints().add(new RowConstraints(rowHeight));
+        pane.getRowConstraints().add(new RowConstraints(rowHeight));
+        pane.getRowConstraints().add(new RowConstraints(rowHeight));
+        pane.getRowConstraints().add(new RowConstraints(rowHeight));
     }
 
     private void createServerInfo() {
@@ -104,7 +114,8 @@ public class Main extends Application {
     }
 
     private void createRefreshButton() {
-        refreshButton = new Button("Refresh");
+        Button refreshButton = new Button("Refresh");
+        refreshButton.setMinWidth(115);
         pane.add(refreshButton, 2, 0);
 
         refreshButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -125,7 +136,7 @@ public class Main extends Application {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
         shopTable.getColumns().addAll(nameColumn, priceColumn);
-        pane.add(shopTable, 0, 2, 2, 3);
+        pane.add(shopTable, 0, 2, 2, 5);
     }
 
     private void createCartView() {
@@ -140,13 +151,13 @@ public class Main extends Application {
         priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
         countColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
         cartTable.getColumns().addAll(nameColumn, priceColumn, countColumn);
-        pane.add(cartTable, 3, 2, 3, 2);
+        pane.add(cartTable, 3, 2, 3, 4);
     }
 
     private void createAddToCartButton() {
-        addToCartButton = new Button("=>");
-        addToCartButton.setMinWidth(buttonWidth);
-        pane.add(addToCartButton, 2, 2);
+        Button addToCartButton = new Button("Add to cart");
+        addToCartButton.setMinWidth(115);
+        pane.add(addToCartButton, 2, 3);
         addToCartButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -162,9 +173,9 @@ public class Main extends Application {
     }
 
     private void createRemoveFromCartButton() {
-        buttonRemoveFromCart = new Button("<=");
-        buttonRemoveFromCart.setMinWidth(buttonWidth);
-        pane.add(buttonRemoveFromCart, 2, 3);
+        Button buttonRemoveFromCart = new Button("Remove from cart");
+        buttonRemoveFromCart.setMinWidth(115);
+        pane.add(buttonRemoveFromCart, 2, 4);
 
         buttonRemoveFromCart.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -177,10 +188,9 @@ public class Main extends Application {
     }
 
     private void createIncrement() {
-        buttonIncrement = new Button("+");
-        buttonIncrement.setMinWidth(buttonWidth * 2);
-        pane.add(buttonIncrement, 3, 4);
-
+        Button buttonIncrement = new Button("+");
+        buttonIncrement.setMinWidth(70);
+        pane.add(buttonIncrement, 3, 6);
         buttonIncrement.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -197,10 +207,9 @@ public class Main extends Application {
     }
 
     private void createDecrement() {
-        buttonDecrement = new Button("-");
-        buttonDecrement.setMinWidth(buttonWidth * 2);
-        pane.add(buttonDecrement, 4, 4);
-
+        Button buttonDecrement = new Button("-");
+        buttonDecrement.setMinWidth(70);
+        pane.add(buttonDecrement, 5, 6);
         buttonDecrement.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -217,8 +226,8 @@ public class Main extends Application {
     }
 
     private void createAddToShopButton() {
-        buttonAddToShop = new Button("Add new good");
-        pane.add(buttonAddToShop, 1, 6);
+        Button buttonAddToShop = new Button("Add new good");
+        pane.add(buttonAddToShop, 1, 7);
         buttonAddToShop.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -228,9 +237,9 @@ public class Main extends Application {
     }
 
     private void createBuyButton() {
-        addToCartButton = new Button("Buy all goods");
-        pane.add(addToCartButton, 4, 6);
-        addToCartButton.setOnAction(new EventHandler<ActionEvent>() {
+        Button buyButton = new Button("Buy all goods");
+        pane.add(buyButton, 4, 7);
+        buyButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
                 try {
@@ -244,12 +253,12 @@ public class Main extends Application {
             }
         });
 
-        pane.add(new Label("Total count:"), 3, 7);
-        pane.add(new Label("Total price:"), 3, 8);
+        pane.add(new Label("Total count:"), 3, 8);
+        pane.add(new Label("Total price:"), 3, 9);
         totalCount = new Label("");
         totalPrice = new Label("");
-        pane.add(totalCount, 4, 7);
-        pane.add(totalPrice, 4, 8);
+        pane.add(totalCount, 4, 8);
+        pane.add(totalPrice, 4, 9);
     }
 
     private void updateShopInfo() {

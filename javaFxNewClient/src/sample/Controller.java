@@ -63,6 +63,7 @@ public class Controller {
     public void increaseCount(Good good) {
         int index = goodsInCart.indexOf(good);
         goodsInCart.get(index).count++;
+        updateTotalInfo();
     }
 
     public void decreaseCount(Good good) {
@@ -71,6 +72,7 @@ public class Controller {
         if (goodsInCart.get(index).count <= 0) {
             goodsInCart.get(index).count = 0;
         }
+        updateTotalInfo();
     }
 
     private void updateTotalInfo() {
@@ -82,7 +84,7 @@ public class Controller {
         }
     }
 
-    public String buy(String server) throws IOException {
+    public void buy(String server) throws IOException {
         String goodsToJson = "";
         try {
             goodsToJson = mapper.writeValueAsString(goodsInCart);
@@ -95,7 +97,6 @@ public class Controller {
         } else {
             throw new IOException(result);
         }
-        return result;
     }
 
     public String authorization(String server, String login, String password) {
@@ -118,9 +119,16 @@ public class Controller {
             LOGGER.error(e.getMessage(), e);
         }
         String result = sessionService.sendPostRequest(server, "add", goodToJson, token).toString();
+        if (result.equals("The goods in the store have been updated.")){
+            for (Good goodInCart : goodsInCart) {
+                if (goodInCart.name.equals(good.name)) {
+                    goodInCart.price = good.price;
+                    break;
+                }
+            }
+        }
         return result;
     }
-
 
     public int getTotalCount() {
         return totalCount;
