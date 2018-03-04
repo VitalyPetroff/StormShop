@@ -8,6 +8,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
@@ -33,20 +35,29 @@ public class AdminStage {
         Scene scene = new Scene(pane, 10, 10);
         adminStage.setScene(scene);
         adminStage.show();
+
+        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent ke) {
+                if (ke.getCode().equals(KeyCode.ENTER)) {
+                    addingGood();
+                }
+            }
+        });
     }
 
     private void stageCreate() {
         int xCoord = 700;
         int yCoord = 10;
         int height = 200;
-        int width = 305;
+        int width = 300;
 
         adminStage = new Stage();
         adminStage.setX(xCoord);
         adminStage.setY(yCoord);
         adminStage.setHeight(height);
         adminStage.setWidth(width);
-        adminStage.setTitle("Adding goods to shop");
+        adminStage.setTitle("Adding good to shop");
     }
 
     private void paneCreate() {
@@ -76,26 +87,30 @@ public class AdminStage {
         addButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                String nameOfGood = name.getText();
-                try {
-                    int priceOfGood = Integer.parseInt(price.getText());
-                    int countOfGood = Integer.parseInt(count.getText());
-                    Good newGood = new Good();
-
-                    newGood.name = nameOfGood;
-                    newGood.price = priceOfGood;
-                    newGood.count = countOfGood;
-
-                    String result = controller.addNewGood(server, newGood);
-                    if (result.equals("FAILED")) {
-                        new Alert(Alert.AlertType.ERROR, "Failed!").show();
-                    } else {
-                        new Alert(Alert.AlertType.INFORMATION, result).show();
-                    }
-                } catch (NumberFormatException e) {
-                    new Alert(Alert.AlertType.ERROR, "Incorrect values are entered!").show();
-                }
+                addingGood();
             }
         });
+    }
+
+    private void addingGood() {
+        String nameOfGood = name.getText();
+        try {
+            int priceOfGood = Integer.parseInt(price.getText());
+            int countOfGood = Integer.parseInt(count.getText());
+            Good newGood = new Good();
+
+            newGood.name = nameOfGood;
+            newGood.price = priceOfGood;
+            newGood.count = countOfGood;
+
+            String result = controller.addNewGood(server, newGood);
+            if (result.equals("FAILED")) {
+                new Alert(Alert.AlertType.ERROR, "Failed!").show();
+            } else {
+                new Alert(Alert.AlertType.INFORMATION, result).show();
+            }
+        } catch (NumberFormatException e) {
+            new Alert(Alert.AlertType.ERROR, "Incorrect values are entered!").show();
+        }
     }
 }
